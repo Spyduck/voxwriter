@@ -76,11 +76,19 @@ def get_material_image(material):
 		if material:
 			socket = material.node_tree.nodes.get('Principled BSDF',None)
 			if socket:
-				link = socket.inputs['Base Color'].links[0]
-				link_node = link.from_node
-				if link_node.image:
-					return link_node.image
+				for link1 in socket.inputs['Base Color'].links:
+					link_node = link1.from_node
+					if 'image' in dir(link_node):
+						return link_node.image
+					else:
+						if link_node.name == 'Mix':
+							for input in link_node.inputs:
+								if input.is_linked:
+									for link2 in input.links:
+										if 'image' in dir(link2.from_node):
+											return link2.from_node.image
 	except:
+		print(traceback.format_exc())
 		return None
 	return None
 
@@ -202,7 +210,7 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 				z = bbox_min[2] + z1 * vox_size + half_size
 				if z > bbox_max[2] + vox_size:
 					break
-				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=vox_size)
+				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*1.5)
 				if inside:
 					inside = (inside_location[0], inside_location[1], inside_location[2])
 					vox_min = (x-half_size,y-half_size,z-half_size)
