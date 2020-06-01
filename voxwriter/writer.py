@@ -67,7 +67,7 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
 	if image.name not in image_tuples:
 		print('Adding image', image.name)
 		image_tuples[image.name] = tuple(image.pixels)
-	color = image_tuples[image.name][pindex:pindex+3]
+	color = image_tuples[image.name][pindex:pindex+4]
 	
 	return color
 
@@ -222,6 +222,8 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 						normal = (-inside_normal[0], -inside_normal[1], -inside_normal[2])
 						color = get_color_from_geometry(target, location, normal, orig_scene=orig_scene, location=inside_location, polygon_index=inside_face)
 						if color:
+							if len(color) == 4 and color[3] < 0.1:
+								continue
 							color = Color(int(color[0]*255), int(color[1]*255), int(color[2]*255), 255)
 							threshold = max(7, min(12, len(palette) * 0.65))
 							palette, color_index = try_add_color_to_palette(color, palette, color_threshold=threshold)
