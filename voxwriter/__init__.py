@@ -2,7 +2,7 @@
 bl_info = {
 	"name": "VoxWriter",
 	"author": "Spyduck",
-	"version": (0,1),
+	"version": (0,2),
 	"blender": (2,80,0),
 	"location": "File > Export > MagicaVoxel (.vox)",
 	"description": "Export to MagicaVoxel .vox",
