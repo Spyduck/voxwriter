@@ -7,27 +7,11 @@ bl_info = {
 	"location": "File > Export > MagicaVoxel (.vox)",
 	"description": "Export to MagicaVoxel .vox",
 	"category": "Export"}
-	
+
 import bpy
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty
 from bpy.types import Operator
-
-def install_requirements():
-	try:
-		print('Checking requirements...')
-		import pyvox
-		import numpy
-		print('Already installed.')
-	except:
-		print('Installing: py-vox-io, numpy')
-		import subprocess, sys
-		from pathlib import Path
-
-		py_path = Path(sys.prefix) / "bin"
-		py_exec = next(py_path.glob("python*"))  # first file that starts with "python" in "bin" dir
-		subprocess.call([str(py_exec), "-m", "ensurepip"])
-		subprocess.call([str(py_exec), "-m", "pip", "install", "py-vox-io", "numpy"])
 
 class ExportSomeData(Operator, ExportHelper):
 	"""Export the selected object to a MagicaVoxel .vox"""
@@ -68,7 +52,6 @@ def menu_func_export(self, context):
 
 
 def register():
-	install_requirements()
 	bpy.utils.register_class(ExportSomeData)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
