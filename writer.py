@@ -198,7 +198,7 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 		print('Default palette length', len(palette))
 	
 	for x1 in range(0,vox_detail):
-		print(str(int(x1 / vox_detail * 100))+'%...')
+		display_progress(100 * x1 / vox_detail)
 		x = bbox_min[0] + x1 * vox_size + half_size
 		if x > bbox_max[0] + vox_size:
 			break
@@ -231,10 +231,12 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 							a[y1,(vox_detail-1)-z1,x1] = color_index+1
 
 	vox = Vox.from_dense(a)
+	display_progress(100)
+	print('')
 	print('Palette length', len(palette))
 	vox.palette = palette
 	VoxWriter(file_path, vox).write()
-	print('100%... Exported to', file_path)
+	print('Exported to', file_path)
 	
 	# delete temporary target
 	bpy.ops.object.select_all(action='DESELECT')
@@ -244,3 +246,8 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 	source.select_set(True)
 	bpy.context.view_layer.objects.active = source
 	print('Took', int(time.time() - last_time), 'seconds')
+
+def display_progress(progress):
+	progress = min(max(0, round(progress)), 100)
+	progress_bar = '[{}{}]'.format('='*round(progress/2),' '*(round(50-progress/2)))
+	print('\r{:3}% {}'.format(progress, progress_bar), end='\r')
