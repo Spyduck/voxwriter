@@ -10,7 +10,7 @@ bl_info = {
 
 import bpy
 from bpy_extras.io_utils import ExportHelper
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty, StringProperty
+from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty, FloatProperty
 from bpy.types import Operator
 
 
