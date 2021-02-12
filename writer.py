@@ -1,14 +1,11 @@
-import math
-import time
-import traceback
-
-import bmesh
-import bpy
-import mathutils.geometry
-import numpy as np
-from mathutils import Vector
+import bpy, mathutils.geometry, bmesh, math, time, traceback
 from mathutils.bvhtree import BVHTree
+from mathutils import Vector
 from mathutils.geometry import barycentric_transform
+
+import numpy as np
+from .pyvox.models import Vox, Color, get_default_palette
+from .pyvox.writer import VoxWriter
 
 from .pyvox.models import Color, Vox, get_default_palette
 from .pyvox.writer import VoxWriter
