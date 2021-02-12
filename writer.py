@@ -1,10 +1,16 @@
-import bpy, mathutils.geometry, bmesh, math, time, traceback
-from mathutils.bvhtree import BVHTree
+import math
+import time
+import traceback
+
+import bmesh
+import bpy
+import mathutils.geometry
+import numpy as np
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 from mathutils.geometry import barycentric_transform
 
-import numpy as np
-from .pyvox.models import Vox, Color, get_default_palette
+from .pyvox.models import Color, Vox, get_default_palette
 from .pyvox.writer import VoxWriter
 
 image_tuples = {}
@@ -159,19 +165,26 @@ def nearest_color_index(color, palette):
 	color = nearest_color(color, palette)
 	return palette.index(color)
 
-def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
+def voxelize(obj, file_path, vox_detail=32, use_default_palette=False, use_selected_objects=False, use_object_bounds=True, voxel_unit_scale=1.0):
 	global image_tuples
 	image_tuples = {}
 	last_time = time.time()
 
 	print('Converting to vox')
+	previous_selection = bpy.context.selected_objects
+
+	if not use_selected_objects:
+		bpy.ops.object.select_all(action='SELECT')
+
 	source = obj
 	source_name = obj.name
-	
-	bpy.ops.object.select_all(action='DESELECT')
-	source.select_set(True)
+
+	for o in bpy.context.selected_objects:
+		if o.type != "MESH":
+			o.select_set(False)
 	
 	bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":"TRANSLATION"})
+	bpy.ops.object.join()
 	bpy.context.object.name = source_name+'_voxelized'
 	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 	bpy.ops.object.convert(target='MESH')
@@ -181,11 +194,17 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 	TriangulateMesh(target)
 	
 	# voxelize
+
+	vox_size = voxel_unit_scale
+	bbox_min = [vox_detail * -0.5, vox_detail * -0.5, vox_detail * -0.5]
+	bbox_max = [vox_detail *  0.5, vox_detail *  0.5, vox_detail *  0.5]
+
+	if use_object_bounds:
+		vox_size = max(target.dimensions) / vox_detail
+		bbox_min, bbox_max = find_bounds(target)
 	
-	vox_size = max(target.dimensions) / vox_detail
 	half_size = vox_size * 0.5
-	bbox_min, bbox_max = find_bounds(target)
-	
+
 	a = np.zeros((vox_detail, vox_detail, vox_detail), dtype=int)
 	
 	dg = bpy.context.evaluated_depsgraph_get()
@@ -210,7 +229,7 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 				z = bbox_min[2] + z1 * vox_size + half_size
 				if z > bbox_max[2] + vox_size:
 					break
-				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*1.5)
+				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*1.42)
 				if inside:
 					inside = (inside_location[0], inside_location[1], inside_location[2])
 					vox_min = (x-half_size,y-half_size,z-half_size)
@@ -242,5 +261,10 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 	bpy.ops.object.delete()
 	bpy.ops.object.select_all(action='DESELECT')
 	source.select_set(True)
+
+	for o in previous_selection:
+		o.select_set(True)
+
 	bpy.context.view_layer.objects.active = source
+
 	print('Took', int(time.time() - last_time), 'seconds')

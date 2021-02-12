@@ -9,9 +9,11 @@ bl_info = {
 	"category": "Export"}
 
 import bpy
-from bpy_extras.io_utils import ExportHelper
-from bpy.props import StringProperty, BoolProperty, IntProperty, EnumProperty
+from bpy.props import (BoolProperty, EnumProperty, FloatProperty, IntProperty,
+                       StringProperty)
 from bpy.types import Operator
+from bpy_extras.io_utils import ExportHelper
+
 
 class ExportSomeData(Operator, ExportHelper):
 	"""Export the selected object to a MagicaVoxel .vox"""
@@ -33,16 +35,65 @@ class ExportSomeData(Operator, ExportHelper):
 		name="Voxel Detail",
 		description="Voxel Detail",
 		default=32,
+		min=1,
+		max=256,
 	)
 	use_default_palette: BoolProperty(
 		name="Use default palette",
 		description="Use default palette",
 		default=False,
 	)
+	use_selected_objects: BoolProperty(
+		name="Selected Objects",
+		description="Export selected meshes only",
+		default=False,
+	)
+	use_object_bounds: BoolProperty(
+		name="Use Object Bounds",
+		description="Uses the object bounds as the basis for the mesh scale inside of the chunk",
+		default=True,
+	)
+	voxel_unit_scale: FloatProperty(
+		name="Voxel Scale",
+		description="The scale of a voxel in the scene",
+		default=1.0,
+		min=0.01,
+		max=256.0,
+	)
+
+	def draw(self, context):
+		layout = self.layout
+
+		row = layout.row()
+		row.prop(self, "use_selected_objects")
+
+		box = layout.box()
+		row = box.row()
+		row.label(text="MagicaVoxel")
+		row = box.row()
+		row.prop(self, "voxel_detail")
+		row = box.row()
+		row.prop(self, "use_default_palette")
+
+		box = layout.box()
+		row = box.row()
+		row.label(text="Voxelizer")
+		row = box.row()
+		row.prop(self, "use_object_bounds")
+		row = box.row()
+		row.active = not self.use_object_bounds
+		row.prop(self, "voxel_unit_scale")
+
 	def execute(self, context):
 		from .writer import voxelize
 		print("running voxelize...")
-		voxelize(context.active_object, self.filepath, vox_detail=max(0,min(126,self.voxel_detail)), use_default_palette=self.use_default_palette)
+		voxelize(context.active_object,
+			     self.filepath,
+				 vox_detail=max(0,min(256,self.voxel_detail)),
+				 use_default_palette=self.use_default_palette,
+				 use_selected_objects=self.use_selected_objects,
+				 use_object_bounds=self.use_object_bounds,
+				 voxel_unit_scale=self.voxel_unit_scale)
 		return {'FINISHED'}
 
 
