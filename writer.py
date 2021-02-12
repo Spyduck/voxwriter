@@ -192,13 +192,19 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False, use_selec
 	
 	# voxelize
 
-	vox_size = voxel_unit_scale
-	bbox_min = [vox_detail * -0.5, vox_detail * -0.5, vox_detail * -0.5]
-	bbox_max = [vox_detail *  0.5, vox_detail *  0.5, vox_detail *  0.5]
+	vox_size = max(target.dimensions) / vox_detail
+	bbox_min, bbox_max = find_bounds(target)
 
-	if use_object_bounds:
-		vox_size = max(target.dimensions) / vox_detail
-		bbox_min, bbox_max = find_bounds(target)
+	if not use_object_bounds:
+		vox_size = voxel_unit_scale
+		center = [(a+b)/2 for a, b in zip(bbox_max, bbox_min)]
+
+		print(bbox_min)
+		print(bbox_max)
+		print(center)
+
+		bbox_min = [(vox_detail * -0.5) + center[0], (vox_detail * -0.5) + center[1], (vox_detail * -0.5) + center[2]]
+		bbox_max = [(vox_detail *  0.5) + center[0], (vox_detail *  0.5) + center[1], (vox_detail *  0.5) + center[2]]
 	
 	half_size = vox_size * 0.5
 
