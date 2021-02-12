@@ -18,6 +18,7 @@ class ExportSomeData(Operator, ExportHelper):
 	"""Export the selected object to a MagicaVoxel .vox"""
 	bl_idname = "export_vox.some_data"
 	bl_label = "MagicaVoxel (.vox)"
+	bl_options = {'PRESET'}
 
 	# ExportHelper mixin class uses this
 	filename_ext = ".vox"
