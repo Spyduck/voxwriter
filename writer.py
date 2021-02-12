@@ -159,7 +159,7 @@ def nearest_color_index(color, palette):
 	color = nearest_color(color, palette)
 	return palette.index(color)
 
-def voxelize(obj, file_path, vox_detail=32, use_default_palette=False, use_selected_objects=False, use_object_bounds=True, voxel_unit_scale=1.0):
+def voxelize(obj, file_path, vox_detail=32, use_default_palette=False, use_selected_objects=False, use_scene_units=False, voxel_unit_scale=1.0):
 	global image_tuples
 	image_tuples = {}
 	last_time = time.time()
@@ -192,8 +192,9 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False, use_selec
 	vox_size = max(target.dimensions) / vox_detail
 	bbox_min, bbox_max = find_bounds(target)
 
-	if not use_object_bounds:
+	if use_scene_units:
 		vox_size = 1.0/voxel_unit_scale
+		vox_detail = round(max(target.dimensions))
 		center = [(a + b)/2 for a, b in zip(bbox_max, bbox_min)]
 
 		bbox_min = [(vox_detail * vox_size * -0.5) + center[0], (vox_detail * vox_size * -0.5) + center[1], (vox_detail * vox_size * -0.5) + center[2]]

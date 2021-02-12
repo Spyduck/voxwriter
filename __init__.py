@@ -48,13 +48,13 @@ class ExportSomeData(Operator, ExportHelper):
 		description="Export selected meshes only",
 		default=False,
 	)
-	use_object_bounds: BoolProperty(
-		name="Use Object Bounds",
-		description="Uses the object bounds as the basis for the mesh scale inside of the chunk",
-		default=True,
+	use_scene_units: BoolProperty(
+		name="Use Scene Units",
+		description="Uses the object dimensions as the basis for the chunk size (This only supports a scene up to 256 units!)",
+		default=False,
 	)
 	voxel_unit_scale: FloatProperty(
-		name="Voxel Scale",
+		name="Scale",
 		description="The scale of a voxel in the scene",
 		default=1.0,
 		min=0.01,
@@ -69,20 +69,21 @@ class ExportSomeData(Operator, ExportHelper):
 
 		box = layout.box()
 		row = box.row()
-		row.label(text="MagicaVoxel")
+		row.label(text="Voxelizer")
 		row = box.row()
+		row.active = not self.use_scene_units
 		row.prop(self, "voxel_detail")
 		row = box.row()
-		row.prop(self, "use_default_palette")
+		row.prop(self, "use_scene_units")
+		row = box.row()
+		row.active = self.use_scene_units
+		row.prop(self, "voxel_unit_scale")
 
 		box = layout.box()
 		row = box.row()
-		row.label(text="Voxelizer")
+		row.label(text="MagicaVoxel")
 		row = box.row()
-		row.prop(self, "use_object_bounds")
-		row = box.row()
-		row.active = not self.use_object_bounds
-		row.prop(self, "voxel_unit_scale")
+		row.prop(self, "use_default_palette")
 
 	def execute(self, context):
 		from .writer import voxelize
@@ -92,7 +93,7 @@ class ExportSomeData(Operator, ExportHelper):
 				 vox_detail=max(0,min(256,self.voxel_detail)),
 				 use_default_palette=self.use_default_palette,
 				 use_selected_objects=self.use_selected_objects,
-				 use_object_bounds=self.use_object_bounds,
+				 use_scene_units=self.use_scene_units,
 				 voxel_unit_scale=self.voxel_unit_scale)
 		return {'FINISHED'}
 
