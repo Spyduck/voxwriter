@@ -7,9 +7,6 @@ import numpy as np
 from .pyvox.models import Vox, Color, get_default_palette
 from .pyvox.writer import VoxWriter
 
-from .pyvox.models import Color, Vox, get_default_palette
-from .pyvox.writer import VoxWriter
-
 image_tuples = {}
 
 def TriangulateMesh( obj ):
