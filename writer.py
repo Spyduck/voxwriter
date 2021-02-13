@@ -210,12 +210,11 @@ def voxelize(obj, file_path, vox_detail=32, use_default_palette=False):
 				z = bbox_min[2] + z1 * vox_size + half_size
 				if z > bbox_max[2] + vox_size:
 					break
-				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*1.5)
+				inside, inside_location, inside_normal, inside_face = get_closest_point(Vector((x,y,z)), target, max_dist=half_size*2)
 				if inside:
-					inside = (inside_location[0], inside_location[1], inside_location[2])
-					vox_min = (x-half_size,y-half_size,z-half_size)
-					vox_max = (x+half_size,y+half_size,z+half_size)
-					if inside > vox_min and inside < vox_max:
+					vox_norm = Vector((x,y,z)) - inside_location
+					vox_norm.normalize()
+					if inside_normal.dot(vox_norm) < -0.5:
 						location = (inside_location[0] + inside_normal[0] * 0.001,
 							inside_location[1] + inside_normal[1] * 0.001,
 							inside_location[2] + inside_normal[2] * 0.001)
