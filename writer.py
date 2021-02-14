@@ -68,8 +68,8 @@ def get_color_from_geometry(obj, ray_origin, ray_direction, orig_scene=None, loc
 		print('Adding image', image.name)
 		image_tuples[image.name] = tuple(image.pixels)
 	color = image_tuples[image.name][pindex:pindex+4]
-	
-	return color
+
+	return [color[0], color[1], color[2]]
 
 def get_material_image(material):
 	try:
